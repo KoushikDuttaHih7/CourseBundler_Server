@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import ErrorMiddleware from "./middleware/ErrorMiddleware.js";
 dotenv.config();
 
 const app = express();
@@ -13,3 +14,5 @@ app.use("/api/v1", course);
 app.use("/api/v1", user);
 
 export default app;
+
+app.use(ErrorMiddleware);
