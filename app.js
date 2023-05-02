@@ -5,6 +5,9 @@ dotenv.config();
 
 const app = express();
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 // All Routes Import
 import course from "./routes/courseRoutes.js";
 import user from "./routes/userRoutes.js";
