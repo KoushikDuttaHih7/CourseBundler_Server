@@ -1,0 +1,11 @@
+{
+  "name": "coursebundler",
+  "version": "1.0.0",
+  "description": "Course Bundler by Koushik Dutta (6 Pack Programmer)",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Koushik Dutta",
+  "license": "ISC"
+}
