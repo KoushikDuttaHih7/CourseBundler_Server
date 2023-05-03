@@ -1,5 +1,11 @@
 import express from "express";
-import { login, logout, register } from "../controllers/userController.js";
+import {
+  getMyProfile,
+  login,
+  logout,
+  register,
+} from "../controllers/userController.js";
+import { isAuthenticated } from "../middleware/auth.js";
 const router = express.Router();
 
 // To Register a new user
@@ -12,6 +18,7 @@ router.route("/login").post(login);
 router.route("/logout").get(logout);
 
 // Get my Profile
+router.route("/me").get(isAuthenticated, getMyProfile);
 
 // Change Password
 // UpdateProfile
