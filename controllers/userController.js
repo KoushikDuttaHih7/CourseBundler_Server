@@ -4,13 +4,15 @@ import { Course } from "../models/CourseModel.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import { sendToken } from "../utils/sendToken.js";
+import getDataUri from "../utils/datauri.js";
 import crypto from "crypto";
+import cloudinary from "cloudinary";
 
 export const register = catchAsyncError(async (req, res, next) => {
   const { name, email, password } = req.body;
-  // const file = req.file
+  const file = req.file;
 
-  if (!name || !email || !password)
+  if (!name || !email || !password || !file)
     return next(new ErrorHandler("Please enter all fields ", 400));
 
   let user = await User.findOne({ email });
@@ -18,14 +20,16 @@ export const register = catchAsyncError(async (req, res, next) => {
   if (user) return next(new ErrorHandler("User already exists", 409));
 
   // Upload file on cloudinary
+  const fileUri = getDataUri(file);
+  const myCloud = await cloudinary.v2.uploader.upload(fileUri.content);
 
   user = await User.create({
     name,
     email,
     password,
     avatar: {
-      public_id: "tempid",
-      url: "tempurl",
+      public_id: myCloud.public_id,
+      url: myCloud.secure_url,
     },
   });
 
@@ -108,10 +112,25 @@ export const updateProfile = catchAsyncError(async (req, res, next) => {
 
 export const updateProfilePicture = catchAsyncError(async (req, res, next) => {
   // Cloudinary to do
+  const file = req.file;
+
+  const user = await User.findById(req.user._id);
+
+  const fileUri = getDataUri(file);
+  const myCloud = await cloudinary.v2.uploader.upload(fileUri.content);
+
+  await cloudinary.v2.uploader.destroy(user.avatar.public_id);
+
+  user.avatar = {
+    public_id: myCloud.public_id,
+    url: myCloud.secure_url,
+  };
+
+  await user.save();
 
   res.status(200).json({
     success: true,
-    message: "Profile Picture Updated Successfully",
+    message: `${user.name} your Profile Picture Updated Successfully`,
   });
 });
 
