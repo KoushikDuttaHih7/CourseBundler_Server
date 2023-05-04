@@ -3,7 +3,7 @@ import { Course } from "../models/CourseModel.js";
 import ErrorHandler from "../utils/errorHandler.js";
 
 export const getAllCourse = catchAsyncError(async (req, res, next) => {
-  const courses = await Course.find().select("-lectures");
+  const courses = await Course.find().select("-lectures").lean();
   res.status(200).json({
     success: true,
     courses,
