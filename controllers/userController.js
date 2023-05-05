@@ -72,6 +72,27 @@ export const getMyProfile = catchAsyncError(async (req, res, next) => {
   });
 });
 
+// Delete Profile
+export const deleteMyProfile = catchAsyncError(async (req, res, next) => {
+  const user = await User.findById(req.user._id);
+
+  await cloudinary.v2.uploader.destroy(user.avatar.public_id);
+
+  // Cancel Subscription
+
+  await user.deleteOne();
+
+  res
+    .status(200)
+    .cookie("token", null, {
+      expires: new Date(Date.now()),
+    })
+    .json({
+      success: true,
+      message: `${user.name} your profile has been Deleted Successfully`,
+    });
+});
+
 export const changePassword = catchAsyncError(async (req, res, next) => {
   const { oldPassword, newPassword } = req.body;
 
@@ -233,5 +254,51 @@ export const removeFromPlaylist = catchAsyncError(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Removed from Playlist",
+  });
+});
+
+// Admin Controllers
+// Admin Routes
+
+// Get All Users
+export const getAllUsers = catchAsyncError(async (req, res, next) => {
+  const users = await User.find({}).lean();
+
+  res.status(200).json({
+    success: true,
+    users,
+  });
+});
+
+// Update User Role
+export const updateUserRole = catchAsyncError(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+  if (!user) return next(new ErrorHandler("User not found", 404));
+
+  if (user.role === "user") user.role = "admin";
+  else user.role = "user";
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: `Role Updated : This person is now an ${user.role}`,
+  });
+});
+
+// Delete User
+export const deleteUser = catchAsyncError(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+  if (!user) return next(new ErrorHandler("User not found", 404));
+
+  await cloudinary.v2.uploader.destroy(user.avatar.public_id);
+
+  // Cancel Subscription
+
+  await user.deleteOne();
+
+  res.status(200).json({
+    success: true,
+    message: `${user.name} has been Deleted Successfully`,
   });
 });
