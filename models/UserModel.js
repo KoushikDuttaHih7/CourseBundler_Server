@@ -4,62 +4,67 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 
-const schema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, "Please enter your name"],
-  },
-  email: {
-    type: String,
-    required: [true, "Please enter your email"],
-    unique: true,
-    validate: validator.isEmail,
-  },
-  password: {
-    type: String,
-    required: [true, "Please enter your password"],
-    minLength: [6, "Password must be at least 6 characters"],
-    select: false,
-  },
-  role: {
-    type: String,
-    enum: ["admin", "user"],
-    default: "user",
-  },
-  subscription: {
-    id: String,
-    status: String,
-  },
-  avatar: {
-    public_id: {
+const schema = new mongoose.Schema(
+  {
+    name: {
       type: String,
-      required: true,
+      required: [true, "Please enter your name"],
     },
-    url: {
+    email: {
       type: String,
-      required: true,
+      required: [true, "Please enter your email"],
+      unique: true,
+      validate: validator.isEmail,
     },
-  },
-  playlist: [
-    {
-      course: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Course",
+    password: {
+      type: String,
+      required: [true, "Please enter your password"],
+      minLength: [6, "Password must be at least 6 characters"],
+      select: false,
+    },
+    role: {
+      type: String,
+      enum: ["admin", "user"],
+      default: "user",
+    },
+    subscription: {
+      id: String,
+      status: String,
+    },
+    avatar: {
+      public_id: {
+        type: String,
+        required: true,
       },
-      poster: String,
+      url: {
+        type: String,
+        required: true,
+      },
     },
-  ],
-  createdAt: {
-    type: Date,
-    default: Date.now,
+    playlist: [
+      {
+        course: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Course",
+        },
+        poster: String,
+      },
+    ],
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+    resetPasswordToken: {
+      type: String,
+    },
+    resetPasswordExpire: {
+      type: String,
+    },
   },
-  resetPasswordToken: {
-    type: String,
-  },
-  resetPasswordExpire: {
-    type: String,
-  },
-});
+  {
+    versionKey: false,
+  }
+);
 
 schema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
