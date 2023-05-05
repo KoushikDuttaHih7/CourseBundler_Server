@@ -11,7 +11,7 @@ import singleUpload from "../middleware/multer.js";
 import { authorizeAdmin, isAuthenticated } from "../middleware/auth.js";
 const router = express.Router();
 
-// Get All Courses without Lectures
+// Get All Courses
 router.route("/courses").get(getAllCourse);
 
 // Create new course - only Admin

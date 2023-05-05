@@ -8,15 +8,14 @@ import getDataUri from "../utils/datauri.js";
 import crypto from "crypto";
 import cloudinary from "cloudinary";
 
+// To Register a new user
 export const register = catchAsyncError(async (req, res, next) => {
   const { name, email, password } = req.body;
   const file = req.file;
-
   if (!name || !email || !password || !file)
     return next(new ErrorHandler("Please enter all fields ", 400));
 
   let user = await User.findOne({ email });
-
   if (user) return next(new ErrorHandler("User already exists", 409));
 
   // Upload file on cloudinary
@@ -36,14 +35,13 @@ export const register = catchAsyncError(async (req, res, next) => {
   sendToken(res, user, "Registered Successfully", 201);
 });
 
+// Login
 export const login = catchAsyncError(async (req, res, next) => {
   const { email, password } = req.body;
-
   if (!email || !password)
     return next(new ErrorHandler("Please enter all fields ", 400));
 
   const user = await User.findOne({ email }).select("+password");
-
   if (!user) return next(new ErrorHandler("Incorrent Credentials", 401));
 
   const isMatch = await user.comparePassword(password);
@@ -52,6 +50,7 @@ export const login = catchAsyncError(async (req, res, next) => {
   sendToken(res, user, `Welcome ${user.name}`, 200);
 });
 
+// Logout
 export const logout = catchAsyncError(async (req, res, next) => {
   res
     .status(200)
@@ -64,6 +63,7 @@ export const logout = catchAsyncError(async (req, res, next) => {
     });
 });
 
+// Get My Profile
 export const getMyProfile = catchAsyncError(async (req, res, next) => {
   const user = await User.findById(req.user._id).lean();
   res.status(200).json({
@@ -72,7 +72,7 @@ export const getMyProfile = catchAsyncError(async (req, res, next) => {
   });
 });
 
-// Delete Profile
+// Delete My Profile
 export const deleteMyProfile = catchAsyncError(async (req, res, next) => {
   const user = await User.findById(req.user._id);
 
@@ -93,9 +93,9 @@ export const deleteMyProfile = catchAsyncError(async (req, res, next) => {
     });
 });
 
+// Change Password
 export const changePassword = catchAsyncError(async (req, res, next) => {
   const { oldPassword, newPassword } = req.body;
-
   if (!oldPassword || !newPassword)
     return next(new ErrorHandler("Please enter all fields ", 400));
 
@@ -105,7 +105,6 @@ export const changePassword = catchAsyncError(async (req, res, next) => {
   if (!isMatch) return next(new ErrorHandler("Incorrent Old Password", 401));
 
   user.password = newPassword;
-
   await user.save();
 
   res.status(200).json({
@@ -114,6 +113,7 @@ export const changePassword = catchAsyncError(async (req, res, next) => {
   });
 });
 
+// Update Profile
 export const updateProfile = catchAsyncError(async (req, res, next) => {
   const { name, email } = req.body;
 
@@ -131,12 +131,12 @@ export const updateProfile = catchAsyncError(async (req, res, next) => {
   });
 });
 
+// Update Profile Picture
 export const updateProfilePicture = catchAsyncError(async (req, res, next) => {
-  // Cloudinary to do
-  const file = req.file;
-
   const user = await User.findById(req.user._id);
 
+  // Cloudinary to do
+  const file = req.file;
   const fileUri = getDataUri(file);
   const myCloud = await cloudinary.v2.uploader.upload(fileUri.content);
 
@@ -155,10 +155,10 @@ export const updateProfilePicture = catchAsyncError(async (req, res, next) => {
   });
 });
 
+// Forget Password
 export const forgetPassword = catchAsyncError(async (req, res, next) => {
   const { email } = req.body;
   const user = await User.findOne({ email });
-
   if (!user) return next(new ErrorHandler("User not found", 400));
 
   const resetToken = await user.getResetToken();
@@ -168,8 +168,8 @@ export const forgetPassword = catchAsyncError(async (req, res, next) => {
   const url = `${process.env.FRONTEND_URL}/resetpassword/${resetToken}`;
   const message = `Click on the link to reset your password.
   ${url}
-  If you haven't requested then please ignore
-  `;
+  If you haven't requested then please ignore`;
+
   // Send token via email
   await sendEmail(user.email, "CourseBundler Reset Password", message);
 
@@ -179,6 +179,7 @@ export const forgetPassword = catchAsyncError(async (req, res, next) => {
   });
 });
 
+// Reset Password
 export const resetPassword = catchAsyncError(async (req, res, next) => {
   const { token } = req.params;
 
@@ -211,6 +212,7 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
   });
 });
 
+// Add To PlayList
 export const addToPlaylist = catchAsyncError(async (req, res, next) => {
   const user = await User.findById(req.user._id);
   if (!user) return next(new ErrorHandler("No User Found", 404));
@@ -236,6 +238,7 @@ export const addToPlaylist = catchAsyncError(async (req, res, next) => {
   });
 });
 
+// Remove From Playlist
 export const removeFromPlaylist = catchAsyncError(async (req, res, next) => {
   const user = await User.findById(req.user._id);
   if (!user) return next(new ErrorHandler("No User Found", 404));
@@ -248,7 +251,6 @@ export const removeFromPlaylist = catchAsyncError(async (req, res, next) => {
   });
 
   user.playlist = newPlaylist;
-
   await user.save();
 
   res.status(200).json({
@@ -258,8 +260,6 @@ export const removeFromPlaylist = catchAsyncError(async (req, res, next) => {
 });
 
 // Admin Controllers
-// Admin Routes
-
 // Get All Users
 export const getAllUsers = catchAsyncError(async (req, res, next) => {
   const users = await User.find({}).lean();

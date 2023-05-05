@@ -29,33 +29,33 @@ router.route("/login").post(login);
 // Logout
 router.route("/logout").get(logout);
 
-// Get my Profile
+// Get My Profile
 router.route("/me").get(isAuthenticated, getMyProfile);
 
-// Delete Profile
+// Delete My Profile
 router.route("/me").delete(isAuthenticated, deleteMyProfile);
 
 // Change Password
 router.route("/changepassword").put(isAuthenticated, changePassword);
 
-// UpdateProfile
+// Update Profile
 router.route("/updateprofile").put(isAuthenticated, updateProfile);
 
-// UpdateProfilePicture
+// Update Profile Picture
 router
   .route("/updateprofilepicture")
   .put(isAuthenticated, singleUpload, updateProfilePicture);
 
-// ForgetPassword
+// Forget Password
 router.route("/forgetpassword").post(forgetPassword);
 
-// ResetPassword
+// Reset Password
 router.route("/resetpassword/:token").put(resetPassword);
 
-// AddToPlayList
+// Add To PlayList
 router.route("/addtoplaylist").post(isAuthenticated, addToPlaylist);
 
-// RemoveFromPlaylist
+// Remove From Playlist
 router.route("/removefromplaylist").delete(isAuthenticated, removeFromPlaylist);
 
 // Admin Routes

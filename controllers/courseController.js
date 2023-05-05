@@ -4,6 +4,7 @@ import getDataUri from "../utils/datauri.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import cloudinary from "cloudinary";
 
+// Get All Courses
 export const getAllCourse = catchAsyncError(async (req, res, next) => {
   const courses = await Course.find().lean();
   res.status(200).json({
@@ -12,15 +13,14 @@ export const getAllCourse = catchAsyncError(async (req, res, next) => {
   });
 });
 
+// Create new course - only Admin
 export const createCourse = catchAsyncError(async (req, res, next) => {
   const { title, description, category, createdBy } = req.body;
-
   if (!title || !description || !category || !createdBy)
     return next(new ErrorHandler("Please write all fields", 400));
 
   const file = req.file;
   const fileUri = getDataUri(file);
-
   const myCloud = await cloudinary.v2.uploader.upload(fileUri.content);
 
   await Course.create({
@@ -40,12 +40,12 @@ export const createCourse = catchAsyncError(async (req, res, next) => {
   });
 });
 
+// Get Course Details
 export const getCourseLecture = catchAsyncError(async (req, res, next) => {
   const course = await Course.findById(req.params.id);
   if (!course) return next(new ErrorHandler("No Course Found", 404));
 
   course.views += 1;
-
   await course.save();
 
   res.status(200).json({
@@ -54,6 +54,7 @@ export const getCourseLecture = catchAsyncError(async (req, res, next) => {
   });
 });
 
+// Add Lecture
 // Max video size 100mb
 export const addLecture = catchAsyncError(async (req, res, next) => {
   const { id } = req.params;
@@ -65,7 +66,6 @@ export const addLecture = catchAsyncError(async (req, res, next) => {
   // Upload file here
   const file = req.file;
   const fileUri = getDataUri(file);
-
   const myCloud = await cloudinary.v2.uploader.upload(fileUri.content, {
     resource_type: "video",
   });
@@ -89,9 +89,9 @@ export const addLecture = catchAsyncError(async (req, res, next) => {
   });
 });
 
+// Delete Course
 export const deleteCourse = catchAsyncError(async (req, res, next) => {
   const { id } = req.params;
-
   const course = await Course.findById(id);
   if (!course) return next(new ErrorHandler("No Course Found", 404));
 
@@ -112,6 +112,7 @@ export const deleteCourse = catchAsyncError(async (req, res, next) => {
   });
 });
 
+// Delete Lecture
 export const deleteLecture = catchAsyncError(async (req, res, next) => {
   const { courseId, lectureId } = req.query;
 
@@ -131,7 +132,6 @@ export const deleteLecture = catchAsyncError(async (req, res, next) => {
   });
 
   course.numOfVideos = course.lectures.length;
-
   await course.save();
 
   res.status(200).json({
