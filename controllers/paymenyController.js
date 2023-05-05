@@ -1,9 +1,11 @@
 import { catchAsyncError } from "../middleware/catchAsyncError.js";
-import { User } from "../models/UserModel.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import { instance } from "../server.js";
+import { User } from "../models/UserModel.js";
+import { Payment } from "../models/PaymentModel.js";
+import crypto from "crypto";
 
-// export const buySubscription = catchAsyncError(async (req, res, next) => {
+// Buy Subscription
 export const buySubscription = catchAsyncError(async (req, res, next) => {
   const user = await User.findById(req.user._id);
   if (user.role === "admin")
@@ -26,5 +28,46 @@ export const buySubscription = catchAsyncError(async (req, res, next) => {
   res.status(201).json({
     success: true,
     subscriptionID: subscription.id,
+  });
+});
+
+// Payment Verification and Save reference in Database
+export const paymentVerification = catchAsyncError(async (req, res, next) => {
+  const { razorpay_payment_id, razorpay_order_id, razorpay_signature } =
+    req.body;
+
+  const user = await User.findById(req.user._id);
+
+  const subscription_id = user.subscription.id;
+
+  const generated_signature = crypto
+    .createHmac("sha256", process.env.RAZORPAY_API_SECRET)
+    .update(razorpay_payment_id + "|" + subscription_id, "utf-8")
+    .digest("hex");
+
+  const isAuthentic = generated_signature === razorpay_signature;
+  if (!isAuthentic) res.redirect(`${process.env.FRONTEND_URL}/paymentfail`);
+
+  // Database coms here
+  await Payment.create({
+    razorpay_payment_id,
+    razorpay_order_id,
+    razorpay_signature,
+  });
+
+  user.subscription.status = "active";
+
+  await user.save();
+
+  res.redirect(
+    `${process.env.FRONTEND_URL}/paymentsuccess?reference${razorpay_payment_id}`
+  );
+});
+
+// Get RazorPay Key
+export const getRazorPayKey = catchAsyncError(async (req, res, next) => {
+  res.status(200).json({
+    success: true,
+    Key: process.env.RAZORPAY_API_KEY,
   });
 });
