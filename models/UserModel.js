@@ -66,6 +66,7 @@ const schema = new mongoose.Schema(
   }
 );
 
+// Save Hashed Password
 schema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   const hashedPassword = await bcrypt.hash(this.password, 10);
@@ -73,6 +74,7 @@ schema.pre("save", async function (next) {
   next();
 });
 
+// JWT TOKEN
 schema.methods.getJWTToken = function () {
   return jwt.sign(
     {
@@ -85,10 +87,12 @@ schema.methods.getJWTToken = function () {
   );
 };
 
+// Compare Password
 schema.methods.comparePassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
+// Reset Password Token
 schema.methods.getResetToken = function () {
   const resetToken = crypto.randomBytes(20).toString("hex");
 
