@@ -72,7 +72,7 @@ export const getRazorPayKey = catchAsyncError(async (req, res, next) => {
   });
 });
 
-// Get RazorPay Key
+// Cancel Subscription
 export const cancelSubscription = catchAsyncError(async (req, res, next) => {
   const user = await User.findById(req.user._id);
   const subscriptionId = user.subscription.id;
