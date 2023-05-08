@@ -4,6 +4,9 @@
   "description": "Course Bundler by Koushik Dutta (6 Pack Programmer)",
   "type": "module",
   "main": "server.js",
+  "engines": {
+    "node": ">=14.20.1"
+  },
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js"
