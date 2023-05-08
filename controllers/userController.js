@@ -7,6 +7,7 @@ import { sendToken } from "../utils/sendToken.js";
 import getDataUri from "../utils/datauri.js";
 import crypto from "crypto";
 import cloudinary from "cloudinary";
+import { Stats } from "../models/StatsModel.js";
 
 // To Register a new user
 export const register = catchAsyncError(async (req, res, next) => {
@@ -301,4 +302,17 @@ export const deleteUser = catchAsyncError(async (req, res, next) => {
     success: true,
     message: `${user.name} has been Deleted Successfully`,
   });
+});
+
+// User call when Change
+User.watch().on("change", async () => {
+  const stats = await Stats.find({}).sort({ createdAt: "desc" }).limit(1);
+
+  const subscription = await User.find({ "subscription.status": "active" });
+
+  stats[0].users = await User.coundDocument();
+  stats[0].subscriptions = subscription.length;
+  stats[0].createdAt = new Date(Date.now());
+
+  await stats[0].save();
 });
