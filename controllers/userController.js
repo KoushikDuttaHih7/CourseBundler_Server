@@ -63,7 +63,7 @@ export const logout = catchAsyncError(async (req, res, next) => {
     })
     .json({
       success: true,
-      message: `${user.name}, you are logging out now/nHope you will comeback soon`,
+      message: `You are logging out now/nHope you will comeback soon`,
     });
 });
 
