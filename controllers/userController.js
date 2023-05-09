@@ -33,7 +33,7 @@ export const register = catchAsyncError(async (req, res, next) => {
     },
   });
 
-  sendToken(res, user, "Registered Successfully", 201);
+  sendToken(res, user, `${user.name}: Registered Successfully`, 201);
 });
 
 // Login
@@ -48,7 +48,7 @@ export const login = catchAsyncError(async (req, res, next) => {
   const isMatch = await user.comparePassword(password);
   if (!isMatch) return next(new ErrorHandler("Incorrent Credentials", 401));
 
-  sendToken(res, user, `Welcome ${user.name}`, 200);
+  sendToken(res, user, `Welcome Back ${user.name}`, 200);
 });
 
 // Logout
@@ -63,7 +63,7 @@ export const logout = catchAsyncError(async (req, res, next) => {
     })
     .json({
       success: true,
-      message: "Logged Out",
+      message: `${user.name}, you are logging out now/nHope you will comeback soon`,
     });
 });
 
