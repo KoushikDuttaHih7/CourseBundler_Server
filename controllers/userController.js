@@ -69,7 +69,7 @@ export const logout = catchAsyncError(async (req, res, next) => {
 
 // Get My Profile
 export const getMyProfile = catchAsyncError(async (req, res, next) => {
-  const user = await User.findById(req.user._id).lean();
+  const user = await User.findById(req.user._id);
   res.status(200).json({
     success: true,
     user,
