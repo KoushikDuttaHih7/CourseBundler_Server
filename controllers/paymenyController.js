@@ -33,7 +33,7 @@ export const buySubscription = catchAsyncError(async (req, res, next) => {
 
 // Payment Verification and Save reference in Database
 export const paymentVerification = catchAsyncError(async (req, res, next) => {
-  const { razorpay_payment_id, razorpay_order_id, razorpay_signature } =
+  const { razorpay_payment_id, razorpay_subscription_id, razorpay_signature } =
     req.body;
 
   const user = await User.findById(req.user._id);
@@ -51,7 +51,7 @@ export const paymentVerification = catchAsyncError(async (req, res, next) => {
   // Database coms here
   await Payment.create({
     razorpay_payment_id,
-    razorpay_order_id,
+    razorpay_subscription_id,
     razorpay_signature,
   });
 
@@ -82,7 +82,7 @@ export const cancelSubscription = catchAsyncError(async (req, res, next) => {
   await instance.subscriptions.cancel(subscriptionId);
 
   const payment = await Payment.findOne({
-    razorpay_order_id: subscriptionId,
+    razorpay_subscription_id: subscriptionId,
   });
 
   const gap = Date.now() - payment.createdAt;
