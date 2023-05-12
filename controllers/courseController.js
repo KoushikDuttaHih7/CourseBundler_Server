@@ -26,14 +26,8 @@ export const getAllCourse = catchAsyncError(async (req, res, next) => {
 // Create new course - only Admin
 export const createCourse = catchAsyncError(async (req, res, next) => {
   const { title, description, category, createdBy } = req.body;
-  // if (!title || !description || !category || !createdBy)
-  //   return next(new ErrorHandler("Please write all fields", 400));
-
-  if (!title) return next(new ErrorHandler("Please write title", 400));
-  if (!description)
-    return next(new ErrorHandler("Please write description", 400));
-  if (!category) return next(new ErrorHandler("Please write category", 400));
-  if (!createdBy) return next(new ErrorHandler("Please write createdBy", 400));
+  if (!title || !description || !category || !createdBy)
+    return next(new ErrorHandler("Please write all fields", 400));
 
   const file = req.file;
   const fileUri = getDataUri(file);
