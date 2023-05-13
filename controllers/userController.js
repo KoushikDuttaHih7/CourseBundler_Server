@@ -1,6 +1,8 @@
 import { catchAsyncError } from "../middleware/catchAsyncError.js";
 import { User } from "../models/UserModel.js";
 import { Course } from "../models/CourseModel.js";
+import { Payment } from "../models/PaymentModel.js";
+import { instance } from "../server.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import { sendToken } from "../utils/sendToken.js";
@@ -79,10 +81,18 @@ export const getMyProfile = catchAsyncError(async (req, res, next) => {
 // Delete My Profile
 export const deleteMyProfile = catchAsyncError(async (req, res, next) => {
   const user = await User.findById(req.user._id);
-
   await cloudinary.v2.uploader.destroy(user.avatar.public_id);
 
   // Cancel Subscription
+  const subscriptionId = user.subscription.id;
+  if (subscriptionId) {
+    await instance.subscriptions.cancel(subscriptionId);
+
+    const payment = await Payment.findOne({
+      razorpay_subscription_id: subscriptionId,
+    });
+    await payment.deleteOne();
+  }
 
   await user.deleteOne();
 
@@ -96,7 +106,7 @@ export const deleteMyProfile = catchAsyncError(async (req, res, next) => {
     })
     .json({
       success: true,
-      message: `${user.name} Your Profile Has Been Deleted Successfully 😢`,
+      message: `${user.name} Your Profile Has Been Deleted Successfully and if you had our subscription then Your Subscription has been ended`,
     });
 });
 
@@ -296,11 +306,18 @@ export const updateUserRole = catchAsyncError(async (req, res, next) => {
 // Delete User
 export const deleteUser = catchAsyncError(async (req, res, next) => {
   const user = await User.findById(req.params.id);
-  if (!user) return next(new ErrorHandler("User not found", 404));
-
   await cloudinary.v2.uploader.destroy(user.avatar.public_id);
 
   // Cancel Subscription
+  const subscriptionId = user.subscription.id;
+  if (subscriptionId) {
+    await instance.subscriptions.cancel(subscriptionId);
+
+    const payment = await Payment.findOne({
+      razorpay_subscription_id: subscriptionId,
+    });
+    await payment.deleteOne();
+  }
 
   await user.deleteOne();
 
